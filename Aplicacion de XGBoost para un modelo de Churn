@@ -1,0 +1,44 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Jun 22 20:30:32 2021
+
+@author: Eduardo
+"""
+
+# Aplicacion del algoritmo XGBoost para un modelo de churn
+ 
+
+# Las librerias a utilizar son: Numpy, Pandas y Matplotlib
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+
+# Importar el data set
+dataset = pd.read_csv(r'C:\telecom_churn.CSV')
+
+# Del conjunto de datos se procede a definir las variables, es decir, "X" e "Y"
+X = dataset.iloc[:, 1:11].values
+y = dataset.iloc[:, 0].values
+
+# Division del dataset entre conjunto de entrenamiento y conjunto de prueba
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, random_state = 0)
+
+#Ajustar el modelo XGBoost al conjunto de entrenamiento
+from xgboost import XGBClassifier
+classifier = XGBClassifier()
+classifier.fit(X_train, y_train)
+
+#Prediccion de resultados con el conjunto de testing
+y_pred = classifier.predict(X_test)
+y_pred = (y_pred>0.5)
+
+# Making the Confusion Matrix
+from sklearn.metrics import confusion_matrix
+cm = confusion_matrix(y_test, y_pred)
+
+#Aplicar  k-fold validation
+from sklearn.model_selection import cross_val_score
+accuracies = cross_val_score(estimator = classifier, X = X_train, y = y_train, cv = 10)
+accuracies.mean()
+accuracies.std()
