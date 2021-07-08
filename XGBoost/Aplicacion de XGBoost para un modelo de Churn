@@ -35,13 +35,5 @@ y_pred = (y_pred>0.5)
 
 accuracies.mean() = 0.9272352228886824
 
-El modelo es muy exitoso para este conjunto de datos
-# Making the Confusion Matrix
-from sklearn.metrics import confusion_matrix
-cm = confusion_matrix(y_test, y_pred)
+El modelo es muy exitoso para este conjunto de datos ya que su precision es de 92,72%
 
-#Aplicar  k-fold validation
-from sklearn.model_selection import cross_val_score
-accuracies = cross_val_score(estimator = classifier, X = X_train, y = y_train, cv = 10)
-accuracies.mean()
-accuracies.std()
