@@ -1,0 +1,142 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Jun  5 23:06:47 2021
+
+@author: Betty
+"""
+
+# Artificial Neural Network
+
+# Instalar theano
+# pip install --upgrade --no-deps git+git://github.com/Theano/Theano.git
+
+# Importing the libraries
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+
+# Parte 1 - Preprocesamiento de datos
+
+# Importando el Dataset
+dataset = pd.read_csv(r'C:\Users\Marina\Documents\Curso de Machine Learning\WA_Fn-UseC_-Telco-Customer-Churn.csv')
+X = dataset.iloc[:, 0:19].values
+y = dataset.iloc[:, 20].values
+
+# Codificar datos Categoricos
+from sklearn.preprocessing import LabelEncoder, OneHotEncoder
+from sklearn.compose import ColumnTransformer
+
+# Quitar la columna de ID
+X = X[:, 1:]
+
+# Preprocesado de la columna de generos
+labelencoder_X = LabelEncoder()
+X[:, 0] = labelencoder_X.fit_transform(X[:, 0])
+
+#Preprocesado de la columna Partners
+X[:, 2] = labelencoder_X.fit_transform(X[:, 2])
+
+#Preprocesado de la columna Dependents
+X[:, 3] = labelencoder_X.fit_transform(X[:, 3])
+
+#Preprocesado de la columna PhoneServices
+X[:, 5] = labelencoder_X.fit_transform(X[:, 5])
+
+# Separacion de la columna de MultipleLines en 3 columnas diferentes
+ct = ColumnTransformer([("MultipleLines", OneHotEncoder(), [6])], remainder = 'passthrough')
+X = ct.fit_transform(X)
+
+#Preprocesado de la columna Internet Services
+X[:, 9] = labelencoder_X.fit_transform(X[:, 9])
+
+#Preprocesados de las columnas:  OnlineSecurity, OnlineBackup, DeviceProtection, TechSupport, StreamingTV, StreamingMovies, Contract, PaperlessBiling 
+X[:, 10] = labelencoder_X.fit_transform(X[:, 10])
+X[:, 11] = labelencoder_X.fit_transform(X[:, 11])
+X[:, 12] = labelencoder_X.fit_transform(X[:, 12])
+X[:, 13] = labelencoder_X.fit_transform(X[:, 13])
+X[:, 14] = labelencoder_X.fit_transform(X[:, 14])
+X[:, 15] = labelencoder_X.fit_transform(X[:, 15])
+X[:, 16] = labelencoder_X.fit_transform(X[:, 16])
+X[:, 17] = labelencoder_X.fit_transform(X[:, 17])
+
+#Transformacion de la columna Payment Method
+ct2 = ColumnTransformer([("PaymentMethod", OneHotEncoder(), [18])], remainder = 'passthrough')
+X = ct2.fit_transform(X)
+
+#Transformacion de la columna Y
+labelencoder_y = LabelEncoder()
+y[0:7043] = labelencoder_y.fit_transform(y[0:7043])
+
+
+# Splitting the dataset into the Training set and Test set
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, random_state = 0)
+
+# Escalado de variables
+from sklearn.preprocessing import StandardScaler
+sc_X = StandardScaler()
+X_train = sc_X.fit_transform(X_train)
+X_test1 = sc_X.transform(X_test)
+
+#Convertir todo en (np.float32)
+X_train = np.asarray(X_train).astype(np.float32)
+y_train = np.asarray(y_train).astype(np.float32)
+
+
+# PARTE 2
+
+# Importar Keras y modelos adicionales
+#import keras
+#from keras.models import Sequential
+#from keras.layers import Dense
+#https://keras.io/guides/sequential_model/
+#python==3.6
+#Cython==0.27
+#h5py==2.8.0
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
+
+#The above issue was due to incompatibility between Tensorflow and Keras version. It can be resolved either by upgrade keras to Keras2.5.0rc0 and import keras or import keras from tensorflow as from tensorflow import keras.For more information you can refer this solution. Thanks
+
+# Inicializar RNA
+classifier = Sequential()
+
+# Añadir las capas de entrada y primera capa oculta
+classifier.add(Dense(units = 6, kernel_initializer = "uniform",
+                     activation = "relu", input_dim = 23))
+
+# Añadir la segunda capa oculta
+classifier.add(Dense(units = 6, kernel_initializer = "uniform", activation = "relu"))
+
+# Añadir la capa de salida
+classifier.add(Dense(units = 1, kernel_initializer = "uniform", activation = "sigmoid"))
+#classifier.add(Dense(units = 1, kernel_initializer = "uniform", activation = "sigmoid"))
+
+#Compilar la RNA
+classifier.compile(optimizer = "adam", loss = "binary_crossentropy", metrics = ["accuracy"])
+
+# Ajustamos la RNA al conjunto de entrenamiento
+classifier.fit(X_train, y_train, batch_size = 10, epochs = 10)
+
+
+
+# Parte 3 - Evaluar el modelo y calcular predicciones finales
+
+# Prediccion de los resultados con el conjunto de testing
+y_pred = classifier.predict(X_test, batch_size=None, verbose=0, steps=None, callbacks=None, max_queue_size=10, workers=1, use_multiprocessing=False)
+y_pred = (y_pred>0.5)
+y_pred = np.asarray(y_pred).astype(np.float32)
+y_test = np.asarray(y_test).astype(np.float32)
+
+
+# Elaborar una matriz de confusion
+from sklearn.metrics import confusion_matrix
+cm = confusion_matrix(y_test, y_pred)
+
+#Matriz de Confusion
+[[886 155]
+ [151 217]]
+
+#Precision
+accuracy: 0.8060
+
