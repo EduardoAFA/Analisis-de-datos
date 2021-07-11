@@ -1,0 +1,68 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Wed May  5 21:34:16 2021
+
+@author: Eduardo
+"""
+
+# Apriori
+
+# Importing the libraries
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+
+
+# Data Preprocessing
+dataset = pd.read_csv(r'C:\Users\Marina\Documents\Curso de Machine Learning\groceries - groceries.csv', header = None)
+transactions = []
+for i in range(0, 9836):
+    transactions.append([str(dataset.values[i, j]) for j in range(0, 33)])
+    
+
+
+# Training the Apriori model on the dataset
+from apyori import apriori
+rules = apriori(transactions, min_support = 0.003, min_confidence = 0.2, min_lift = 3, min_length = 2)
+
+# Visualising the results
+results = list(rules)
+print(results)
+
+V = [r for r in rules]
+
+
+# Visualizacion de los datos
+
+#Declaramos valores para el eje X
+eje_x = ["canasta 1", 
+         "canasta 2",
+         "canasta 3"]
+
+
+
+#Declaramos el eje Y
+eje_y = [0.61, 0.49, 0.44]
+
+#Creacion de la grafica
+plt.bar(eje_x, eje_y)
+
+#Leyenda en el eje x
+plt.xlabel("Canastas de bienes")
+
+#Leyenda en el eje y
+plt.ylabel("Nivel de confianza")
+
+#Leyenda
+plt.plot(eje_y, label = "canasta 1: yogurt, tropical fruit, whole milk, root vegetables")
+plt.plot(eje_y, label = "canasta 2: other vegetables, yogurt, tropical fruit, whole milk")
+plt.plot(eje_y, label = "canasta 3: other vegetables, yogurt, whole milk root vegetables")
+plt.legend(loc = "upper left", bbox_to_anchor=(1.5, 1), ncol=1, fancybox=True)
+
+
+#Titulo de la Grafica
+plt.title("Nivel de confianza de las canastas")
+
+#Enseñamos la grafica
+plt.show()
+
